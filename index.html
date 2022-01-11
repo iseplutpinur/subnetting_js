@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subnetting</title>
+</head>
+
+<body>
+  <form action="" id="fmain">
+    <input type="number" max="255" min="0" name="ip1" value="172" title="ip1" style="max-width: 50px;">
+    <span>.</span>
+    <input type="number" max="255" min="0" name="ip2" value="16" title="ip2" style="max-width: 50px;">
+    <span>.</span>
+    <input type="number" max="255" min="0" name="ip3" value="10" title="ip3" style="max-width: 50px;">
+    <span>.</span>
+    <input type="number" max="255" min="0" name="ip4" value="100" title="ip4" style="max-width: 50px;">
+    <span>/</span>
+    <input type="number" name="prefix" value="27" title="prefix" style="max-width: 50px;">
+
+    <button type="submit" title="submit for count">Submit</button>
+  </form>
+  <main>
+    <pre id="output">
+
+    </pre>
+  </main>
+  <script>
+    document.getElementById('fmain')
+      .addEventListener('submit', run)
+
+    function run(e) {
+      if (e != null) {
+        e.preventDefault();
+      }
+      const [ip1, ip2, ip3, ip4, prefix] = [this.ip1, this.ip2, this.ip3, this.ip4, this.prefix];
+
+      // perhitungan ===================================================================================================
+      // total ip
+      const total_ip_pre = (32 - Number(prefix.value))
+      const total_ip = 2 ** total_ip_pre;
+
+      // subnetmask
+      const subnetmask = 256 - total_ip;
+
+      // ip network & broadcast
+      let ip_network = '';
+      let ip_network_text = '';
+      let ip_broadcast = '';
+      let ip_broadcast_text = '';
+      let counter = 0;
+
+      // range
+      while (counter < 256) {
+        ip_network_text += `${counter}&Tab;`;
+        counter += total_ip;
+
+        if (counter != 0) {
+          ip_broadcast_text += `${counter - 1}&Tab;`;
+        }
+
+        // menentukan ip network dan bradcast serta range
+        // counter - total_ip ip sekarang
+        if (((counter - total_ip) < Number(ip4.value)) && ((counter - 1) > Number(ip4.value))) {
+          ip_network = (counter - total_ip);
+          ip_broadcast = (counter - 1);
+        }
+
+        // cek error
+        if ((counter - total_ip) == Number(ip4.value)) {
+          alert(`Error, ip ${ip4.value} tidak bisa digunakan, karena ip ${ip4.value} merupakan ip network`);
+
+          return false;
+        }
+        if ((counter - 1) == Number(ip4.value)) {
+          alert(`Error, ip ${ip4.value} tidak bisa digunakan, karena ip ${ip4.value} merupakan ip broadcast`);
+
+          return false;
+        }
+
+      }
+
+
+      // ===============================================================================================================
+
+      document.getElementById('output').innerHTML = `
+${ip1.value}.${ip2.value}.${ip3.value}.${ip4.value}/${prefix.value}
+Total IP&Tab;-> (32-prefix)&Tab;-> 32-${prefix.value}=${total_ip_pre}, 2^${total_ip_pre}=${total_ip}
+Subnetmask&Tab;-> 256-Total IP&Tab;-> 256-${total_ip}=${subnetmask}, 255.255.255.${subnetmask}
+IP Network&Tab;-> ${ip_network_text}${ip1.value}.${ip2.value}.${ip3.value}.${ip_network}
+IP Broadcast&Tab;-> ${ip_broadcast_text}${ip1.value}.${ip2.value}.${ip3.value}.${ip_broadcast}
+IP Range&Tab;-> ${ip1.value}.${ip2.value}.${ip3.value}.${ip_network + 1}(Setelah network) - ${ip1.value}.${ip2.value}.${ip3.value}.${ip_broadcast - 1}(Sebelum Broadcast)
+      `;
+
+      return true;
+    }
+  </script>
+</body>
+
+</html>
